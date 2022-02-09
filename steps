@@ -1,0 +1,534 @@
+import React, { useState } from 'react'
+import { useForm, Controller } from 'react-hook-form'
+import './Content.css'
+import Step1 from './Step1/Step1'
+import Step2 from './Step2/Step2'
+import Info from './Info'
+import IconKPIFed from '../images/IconKPIFed'
+import Title from './Title'
+import IconLoading from '../../images/loading.gif'
+import NumberFormat from 'react-number-format'
+import InputMask from 'react-input-mask'
+
+const SectionCalculator = () => {
+
+    const [formStep, setFormStep] = useState(0)
+    const completForm = () => {
+        setFormStep(cur => cur +1)
+        if( formStep == 5 ) () => {onSubmit()}
+
+        const element = document.querySelector(`.calculator`)
+        element.scrollIntoView({block: 'start'})
+    }
+
+    const newCompletForm = () => {
+        setFormStep(cur => cur =0)
+        reset({
+            areaSizeHa: "",
+            totalHerdSize: "",
+            zip: "",
+            hasMeat: "false",
+            meatHerdSize: "",
+            productionAVDinKg: "",
+            hasMilk: "true",
+            milkOnDayInLiter: "",
+            milkHerdSize: "",
+            name: "",
+            email: "",
+            date: ""
+        })
+    }
+
+    const { register, watch, handleSubmit, control, formState:{ errors, isValid },  reset, getValues, setValue  } = useForm({mode:"all"})
+
+    const onSubmit = (data) => {
+
+        const requestOptions = {
+            method: 'POST',
+            headers: {
+                'authToken': 'aAB?EEvfC9@,aMhp6bXzfCWAKdFmEb4WhzXfd*2>C3jA3w3=zqYnfTecR^TgoDkL',
+            },
+            body: JSON.stringify(data)
+        }
+
+        fetch('https://q0fli1hnqd.execute-api.us-east-1.amazonaws.com/production', requestOptions)
+        .then(response =>
+                response.json(),
+                document.querySelector('.formcontact__modalloading').click()
+                )
+        .then(data => {
+            document.querySelector('.formcontact__modalloading').click()
+            setFormStep(cur => cur = 6)
+            const result = data.results.peoplefedmonth
+            //console.log(result)
+            console.log(data)
+            const peopleFedInMonthFinal = parseFloat(result).toFixed(0)
+
+            document.getElementById('farmerperweek').innerHTML = formatter().format(peopleFedInMonthFinal/4)
+            document.getElementById('farmerpermonth').innerHTML = formatter().format(peopleFedInMonthFinal)
+            document.getElementById('farmerperyear').innerHTML = formatter().format(peopleFedInMonthFinal*12)
+        })
+        .catch((error) => {
+            console.error('Error:', error)
+        })
+    }
+
+    const [ showmodalLoading, setShowmodalLoading ] = useState(false)
+    const modalLoading = () => {
+        setShowmodalLoading(showmodalLoading ? false : true)
+    }
+
+    const currentYear = (new Date().toLocaleDateString('en-US').split('-'))
+
+    const formatter = () => new Intl.NumberFormat('pt-BR',{
+        style: 'decimal',
+        useGrouping: true,
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    })
+
+    const milkForm = () => {
+        const itemProd = getValues('item')
+        const currentStep = getValues('step')
+
+        if(currentStep == "step-1" && itemProd == "Carne"){
+            setFormStep(cur => cur = 4)
+            setValue('hasMeat','true')
+        }else if(currentStep == "step-1" && itemProd == "Leite"){
+            setFormStep(cur => cur = 3)
+            setValue('step','step-2')
+        }else if(currentStep == "step-2" && itemProd == "Leite"){
+            setFormStep(cur => cur = 5)
+            setValue('hasMilk','true')
+            setValue('hasMeat','false')
+        }else if(currentStep == "step-2"){
+            setFormStep(cur => cur = 4)
+            setValue('hasMilk','true')
+            setValue('hasMeat','false')
+        }else{
+            setFormStep(cur => cur = 3)
+            setValue('step','step-2')
+        }
+    }
+
+    const profile = Step2.map((profile,key) => {
+        return  <div className="radioiconelement" key={key}>
+                    <input className="customradioicon"
+                        id={profile.id}
+                        name ="item"
+                        type="checkbox"
+                        value={profile.type}
+                        {...register("item", { required: true })}
+                    />
+                    <label className="userImage" htmlFor={profile.id}>
+                        {profile.image()}
+                    </label>
+                    <p className="userInfo">
+                        {profile.type}
+                    </p>
+                    <span className="arrow">&nbsp;</span>
+                </div>
+    })
+
+    return (
+        <div className="container">
+            <div className="formcontact__modalloading" onClick={modalLoading} >
+            { showmodalLoading ?
+                <div className="modalbackground">
+                    <div className="modalmiddle">
+                        <div className="modalbody">
+                            <div className="modalbody__title">
+                                <h2>
+                                    <b>Obrigado por suas informações</b>
+                                </h2>
+                                <img src={ IconLoading } className="img-fluid"/>
+                            </div>
+                            <div className="modalbody__body">
+                                <h3>
+                                    O cálculo está sendo gerado, aguarde alguns instantes. Por favor.
+                                </h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>:''}
+            </div>
+            <div className="calculator">
+                <form onSubmit={handleSubmit(onSubmit)}>
+                    <input type="hidden" {...register("date")} value={ currentYear } />
+                    <input type="hidden" {...register("zip")} value="" />
+
+                    {/* <pre style={{position:`absolute`,backgroundColor:`black`,width:`15rem`,height:`18rem`,left:`0`,color:`white`}}>
+                        {JSON.stringify(watch(), null, 2)}
+                    </pre> */}
+
+                    {formStep === 0 &&
+                        <section className="calculator__secction step-0" >
+                            <Title/>
+                            <div className="calculator__partTop" >
+                                <Step1/>
+                            </div>
+                            <div className="calculator__partBotton">
+                                <div className=''>
+                                    <div className="actionplace">
+                                        <div className="actionplace__content">
+                                            <h3>Produtor, calcule o seu resultado!</h3>
+                                            <p>Faça as contas e veja quantas pessoas você alimenta este ano.</p>
+                                        </div>
+                                        <div className="actionplace__cta">
+                                            <button className="buttonsecundary" onClick={completForm}>Calcular meu impacto</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    }
+                    {formStep === 1 &&
+                        <section className="calculator__secction step-1" >
+                            <Title/>
+                            <div className="calculator__partTop">
+                                <h3>
+                                    Produtor, calcule quantas pessoas você já alimentou em 2021
+                                </h3>
+                                <div className="step2__place">
+                                    <div className="step2__icon">
+                                        <IconKPIFed/>
+                                    </div>
+                                    <div className="step2__info">
+                                        <p><b>></b> Informe qual o seu tipo de produção ou de produções?</p>
+                                        <div className="step2__infoprofile">
+                                            { profile }
+                                        </div>
+                                    </div>
+                                    <div className="step2__cta">
+                                        <button className="buttonsecundary"
+                                            onClick={completForm}
+                                            disabled={!isValid}
+                                            value="step-1"
+                                            {...register("step")}
+                                        >Continuar</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    }
+                    {formStep === 2 &&
+                        <section className="calculator__secction step-2" >
+                            <Title/>
+                            <div className="calculator__partTop">
+                                <h3>
+                                    Produtor, calcule quantas pessoas você já alimentou em 2021
+                                </h3>
+                                <div className="step3__place">
+                                    <div className="step3__icon">
+                                        <IconKPIFed/>
+                                    </div>
+                                    <div className="step3__info">
+                                        <p><b>></b> Informe os dados de sua produção</p>
+                                        <div className="step3__infoinput">
+                                            <div>
+                                                <h4>Área da Propriedade (Ha)</h4>
+                                                <div className="inputgroup">
+                                                    <Controller
+                                                        name="areaSizeHa"
+                                                        control={control}
+                                                        defaultValue={""}
+                                                        render={({ field: { onChange } }) => (
+                                                                <NumberFormat className="inputgroupitem"
+                                                                thousandSeparator={"."}
+                                                                decimalSeparator={","}
+                                                                decimalScale={'2'}
+                                                                allowNegative={false}
+                                                                onValueChange={(v) => {
+                                                                    onChange(v.value)
+                                                                }}
+                                                            />
+                                                            )
+                                                        }
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <h4>Tamanho total do rebanho (cabeças)</h4>
+                                                <div className="inputgroup">
+                                                    <Controller
+                                                        name="totalHerdSize"
+                                                        control={control}
+                                                        defaultValue={""}
+                                                        render={({ field: { onChange } }) => (
+                                                            <NumberFormat className="inputgroupitem"
+                                                                thousandSeparator={"."}
+                                                                decimalSeparator={","}
+                                                                decimalScale={'2'}
+                                                                allowNegative={false}
+                                                                onValueChange={(v) => {
+                                                                    onChange(v.value)
+                                                                }}
+                                                            />
+                                                            )
+                                                        }
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="step3__cta">
+                                        <button className="buttonsecundary"
+                                            onClick={ milkForm }
+                                        >Continuar</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    }
+                    {formStep === 3 &&
+                        <section className="calculator__secction step-3" >
+                            <Title/>
+                            <div className="calculator__partTop">
+                                <h3>
+                                    Produtor, calcule quantas pessoas você já alimentou em 2021
+                                </h3>
+                                <div className="step3__place">
+                                    <div className="step3__icon">
+                                        <IconKPIFed/>
+                                    </div>
+                                    <div className="step3__info">
+                                        <p><b>></b> Informe os dados de sua produção de <b>leite</b></p>
+                                        <div className="step3__infoinput">
+                                            <div>
+                                                <h4>Litros de leite produzidos por dia</h4>
+                                                <div className="inputgroup">
+                                                    <Controller
+                                                        name="milkOnDayInLiter"
+                                                        control={control}
+                                                        defaultValue={""}
+                                                        rules={{ required: true, maxLength: 10, minLength:2 }}
+                                                        render={({ field: { onChange } }) => (
+                                                            <NumberFormat className="inputgroupitem"
+                                                                thousandSeparator={"."}
+                                                                decimalSeparator={","}
+                                                                decimalScale={'2'}
+                                                                allowNegative={false}
+                                                                onValueChange={(v) => {
+                                                                    onChange(v.value)
+                                                                    //console.log(v.value)
+                                                                }}
+                                                                //{...field}
+                                                            />
+                                                            )
+                                                        }
+                                                    />
+                                                </div>
+                                                {errors.milkOnDayInLiter && <p>Por favor, preencha este campo.</p>}
+                                            </div>
+                                            <div>
+                                                <h4>Quantidade média de vacas lactantes</h4>
+                                                <div className="inputgroup">
+                                                    <Controller
+                                                        name="milkHerdSize"
+                                                        control={control}
+                                                        defaultValue={""}
+                                                        render={({ field: { onChange } }) => (
+                                                            <NumberFormat className="inputgroupitem"
+                                                                thousandSeparator={"."}
+                                                                decimalSeparator={","}
+                                                                decimalScale={'2'}
+                                                                allowNegative={false}
+                                                                onValueChange={(v) => {
+                                                                    onChange(v.value)
+                                                                }}
+                                                            />
+                                                            )
+                                                        }
+                                                    />
+                                                </div>
+                                            </div>
+                                            <input type="hidden" {...register("meatHerdSize")} value="" />
+                                            <input type="hidden" {...register("productionAVDinKg")} value="" />
+                                        </div>
+                                    </div>
+                                    <div className="step3__cta">
+                                        <button className="buttonsecundary"
+                                            onClick={milkForm}
+                                            disabled={!isValid} //disabled
+                                        >Continuar</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    }
+                    {formStep === 4 &&
+                        <section className="calculator__secction step-4" >
+                            <Title/>
+                            <div className="calculator__partTop">
+                                <h3>
+                                    Produtor, calcule quantas pessoas você já alimentou em 2021
+                                </h3>
+                                <div className="step3__place">
+                                    <div className="step3__icon">
+                                        <IconKPIFed/>
+                                    </div>
+                                    <div className="step3__info">
+                                        <p><b>></b> Informe os dados de sua produção de <b>carne</b></p>
+                                        <div className="step3__infoinput">
+                                            <div>
+                                                <h4>Quantidade cabeças de corte</h4>
+                                                <div className="inputgroup">
+                                                    <Controller
+                                                        name="meatHerdSize"
+                                                        control={control}
+                                                        defaultValue={""}
+                                                        rules={{ required: true, maxLength: 10, minLength:2 }}
+                                                        render={({ field: { onChange } }) => (
+                                                            <NumberFormat className="inputgroupitem"
+                                                                thousandSeparator={"."}
+                                                                decimalSeparator={","}
+                                                                decimalScale={'2'}
+                                                                allowNegative={false}
+                                                                onValueChange={(v) => {
+                                                                    onChange(v.value)
+                                                                }}
+                                                            />
+                                                            )
+                                                        }
+                                                    />
+                                                </div>
+                                                {errors.meatHerdSize && <p>Por favor, preencha este campo.</p>}
+                                            </div>
+                                            <div>
+                                                <h4>Ganho Médio Diário (GMD) em kg</h4>
+                                                <div className="inputgroup">
+                                                    <Controller
+                                                        name="productionAVDinKg"
+                                                        control={control}
+                                                        defaultValue={""}
+                                                        render={({ field: { onChange } }) => (
+                                                            <NumberFormat className="inputgroupitem"
+                                                                thousandSeparator={"."}
+                                                                decimalSeparator={","}
+                                                                decimalScale={'2'}
+                                                                allowNegative={false}
+                                                                onValueChange={(v) => {
+                                                                    onChange(v.value)
+                                                                }}
+                                                            />
+                                                            )
+                                                        }
+                                                    />
+                                                </div>
+                                            </div>
+                                            <input type="hidden" {...register("milkOnDayInLiter")} value="" />
+                                            <input type="hidden" {...register("milkHerdSize")} value="" />
+                                        </div>
+                                    </div>
+                                    <div className="step3__cta">
+                                        <button className="buttonsecundary"
+                                            onClick={completForm}
+                                            disabled={!isValid}
+                                        >Continuar</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    }
+                    {formStep === 5 &&
+                        <section className="calculator__secction step-5" >
+                            <Title/>
+                            <div className="calculator__partTop">
+                                <h3>
+                                    Produtor, calcule quantas pessoas você já alimentou em 2021
+                                </h3>
+                                <div className="step4__place">
+                                    <div className="step4__icon">
+                                        <IconKPIFed/>
+                                    </div>
+                                    <div className="step4__info">
+                                        <p><b>></b> Informe os seus dados pessoais</p>
+                                        <div className="step4__infoinput">
+                                            <div>
+                                                <h4>Nome</h4>
+                                                <div className="inputgroup">
+                                                    <input className="inputgroupitem"
+                                                        type="text"
+                                                        {...register("name", { required: true, maxLength: 100, minLength:2 })}
+                                                    />
+                                                </div>
+                                                {errors.name && <p>Por favor, preencha este campo.</p>}
+                                            </div>
+                                            <div>
+                                                <h4>E-mail</h4>
+                                                <div className="inputgroup">
+                                                    <input className="inputgroupitem"
+                                                        type="email"
+                                                        {...register("email", { required: true, maxLength: 100, minLength:2,
+                                                                                pattern: {
+                                                                                    value: /^([\w-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([\w-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$/,
+                                                                                    message: "Entered value does not match email format"
+                                                                                } })}
+                                                    />
+                                                </div>
+                                                {errors.email && <p>Por favor, preencha este campo.</p>}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="step4__cta">
+                                        <button type="submit" className="buttonsecundary"
+                                            disabled={!isValid}
+                                        >Calcular</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    }
+                    {formStep === 6 &&
+                        <section className="calculator__secction step-6" >
+                            <Title/>
+                            <div className="calculator__partTop" >
+                                <h3>
+                                    <b>{getValues("name")}</b>, veja quantas pessoas sua propriedade pode alimentar em 2021
+                                </h3>
+                                <div className="step5__place">
+                                    <div className="step5__info">
+                                        <p id="farmerperweek"></p>
+                                        <p>Por Semana</p>
+                                    </div>
+                                    <div className="step5__icon">
+                                        <IconKPIFed/>
+                                    </div>
+                                    <div className="step5__info">
+                                        <p id="farmerpermonth"></p>
+                                        <p>Por Mês</p>
+                                    </div>
+                                    <div className="step5__icon">
+                                        <IconKPIFed/>
+                                    </div>
+                                    <div className="step5__info">
+                                        <p id="farmerperyear"></p>
+                                        <p>Por Ano</p>
+                                    </div>
+                                </div>
+                                <Info/>
+                            </div>
+                            <div className="calculator__partBotton">
+                                <div className=''>
+                                    <div className="actionplace">
+                                        <div className="actionplace__content">
+                                            <h3>Produtor, calcule o seu resultado!</h3>
+                                            <p>Faça as contas e veja quantas pessoas você alimenta este ano.</p>
+                                        </div>
+                                        <div className="actionplace__cta return">
+                                            <button className="buttonsecundary"
+                                                onClick={ newCompletForm }
+                                            >Calcular novamente</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    }
+                </form>
+            </div>
+        </div>
+    )
+}
+
+export default SectionCalculator
