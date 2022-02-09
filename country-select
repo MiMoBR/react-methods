@@ -1,4 +1,5 @@
-- [react-phone-number-input](https://www.npmjs.com/package/react-phone-number-input & https://catamphetamine.gitlab.io/react-phone-number-input/)
+yarn add @material-ui/core
+yarn add i18n-iso-countries
 - [React Hook Form](https://github.com/react-hook-form/react-hook-form)
 
 import { Controller, useForm } from 'react-hook-form'
