@@ -1,0 +1,31 @@
+
+import NumberFormat from 'react-number-format'
+import { useForm, Controller } from 'react-hook-form'
+
+    const currentYear = (new Date().toLocaleDateString('en-US').split('-'))
+
+    const formatter = () => new Intl.NumberFormat('pt-BR',{
+        style: 'decimal',
+        useGrouping: true,
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    })
+    
+    return (
+      <Controller
+        name="areaSizeHa"
+        control={control}
+        defaultValue={""}
+        render={({ field: { onChange } }) => (
+                <NumberFormat className="inputgroupitem"
+                thousandSeparator={"."}
+                decimalSeparator={","}
+                decimalScale={'2'}
+                allowNegative={false}
+                onValueChange={(v) => {
+                    onChange(v.value)
+                }}
+            />
+            )
+        }
+      />
