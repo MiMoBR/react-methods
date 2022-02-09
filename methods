@@ -75,6 +75,13 @@ const toLoweCase = event => {
   event.target.value = event.target.value.toLowerCase()
 }
 
+const onlyNumbers = event => {
+  const numbers = event.charCode // ?!@#$%&
+  // console.log(event.charCode)
+
+  if (numbers <= 47 || numbers >= 58) { event.preventDefault() } // 48-57 0-9
+}
+
 export {
   avoidSpaces,
   onPasteRemoveSpaces,
@@ -82,5 +89,6 @@ export {
   maxLength,
   toLoweCase,
   onPasteRemoveSpacesandLowercase,
-  keyupPasswordMember
+  keyupPasswordMember,
+  onlyNumbers
 }
