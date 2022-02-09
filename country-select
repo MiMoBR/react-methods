@@ -1,0 +1,62 @@
+- [react-phone-number-input](https://www.npmjs.com/package/react-phone-number-input & https://catamphetamine.gitlab.io/react-phone-number-input/)
+- [React Hook Form](https://github.com/react-hook-form/react-hook-form)
+
+import { Controller, useForm } from 'react-hook-form'
+import { Select, MenuItem } from '@material-ui/core'
+import countries from 'i18n-iso-countries'
+// Import the languages you want to use
+import enLocale from 'i18n-iso-countries/langs/en.json'
+import ptLocale from 'i18n-iso-countries/langs/pt.json'
+
+  const [country, selectCountry] = useState('BR')
+  const [aboutBrasil, setAboutBrasil] = useState(true)
+
+  const isBrazil = (val) => {
+    setAboutBrasil(val !== 'BR' ? false : true )
+  }
+
+
+  const [selectedCountry, setSelectedCountry] = useState("BR")
+  const selectCountryHandler = (value) => setSelectedCountry(value)
+
+  countries.registerLocale(enLocale)
+  countries.registerLocale(ptLocale)
+
+  const lgFlag = content.join_us_page.never_touch_here
+
+  console.log(content.join_us_page.never_touch_here)
+  const countryObj = countries.getNames(lgFlag, { select: "official" })
+  const countryArr = Object.entries(countryObj).map(([key, value]) => {
+    return {
+      label: value,
+      value: key
+    }
+  })
+
+return (
+  <Input>
+    <p>{translate('country')}</p>
+    <Controller
+      name="country2"
+      control={control}
+      defaultValue={"BR"}
+      render={({ field: { onChange } }) => (
+        <Select
+          value={selectedCountry}
+          onChange={(e) => {
+            selectCountryHandler(e.target.value);
+            onChange(e.target.value)
+            isBrazil(e.target.value)
+          }}
+        >
+        {!!countryArr?.length &&
+          countryArr.map(({ label, value }) => (
+            <MenuItem key={value} value={value}>
+              {label}
+            </MenuItem>
+          ))}
+      </Select>
+      )}
+    />
+    {errors.country2 && <div className="erroForm"><p>{ translate('error_country') }</p></div>}
+  </Input>
