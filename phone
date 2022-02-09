@@ -1,0 +1,24 @@
+
+- [react-phone-number-input](https://www.npmjs.com/package/react-phone-number-input & https://catamphetamine.gitlab.io/react-phone-number-input/)
+
+import PhoneInput from 'react-phone-number-input'
+import { useForm, Controller } from 'react-hook-form'
+
+  <Controller
+    name="phone"
+    control={control}
+    defaultValue={''}
+    rules={{ required: true, maxLength: 14, minLength: 2 }}
+    render={({ field: { onChange, value } }) => (
+      <PhoneInput
+        placeholder={translate('mobile')}
+        value={value}
+        international
+        countryCallingCodeEditable={false}
+        onChange={onChange}
+        defaultCountry={"BR"}
+        countries={["BR", "US"]}
+      />
+    )}
+  />
+  {errors.phone && <p>{translate('required_field')}</p>}
