@@ -53,6 +53,15 @@ const Access = () => {
   const verifyPasswordShow = () => {
     setShowVerifyPassword(!showVerifyPassword)
   }
+  
+  const toClosePopupSuccess = () => {
+    setTimeout(() => {
+      // console.log('Initial timeout!'),
+      setclosePopupSuccess(false),
+      navigate('/private/useradmin/field-agents/')
+    }, 2000)
+    // setclosePopupSuccess(false)
+  }
 
   const {
     register,
@@ -70,6 +79,7 @@ const Access = () => {
       const userLogged = jwtDecode(credentials.data.data)
       localStorage.setItem('userLogged', JSON.stringify(userLogged.user)) // open token as JSON
 
+      toClosePopupSuccess()
       modalLoading()
       navigate('/private/dashboard/')
     } catch (error) {
