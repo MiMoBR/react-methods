@@ -1,9 +1,10 @@
-
 - [react-phone-number-input](https://www.npmjs.com/package/react-phone-number-input & https://catamphetamine.gitlab.io/react-phone-number-input/)
 
 import PhoneInput from 'react-phone-number-input'
+import 'react-phone-number-input/style.css'
 import { useForm, Controller } from 'react-hook-form'
 
+<div className="simpleInput" >
   <Controller
     name="phone"
     control={control}
@@ -22,3 +23,4 @@ import { useForm, Controller } from 'react-hook-form'
     )}
   />
   {errors.phone && <p>{translate('required_field')}</p>}
+</div>
