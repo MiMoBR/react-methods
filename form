@@ -1,0 +1,181 @@
+import React, { useState, useEffect } from 'react'
+import { useSelector } from 'react-redux'
+import LanguageFlag from '../../languageFlag'
+import IconHidePassword from '../../../assets/images/svg/IconHidePassword'
+import IconShowPassword from '../../../assets/images/svg/IconShowPassword'
+import { useForm } from 'react-hook-form'
+import { loginUser } from '../../../services/user/user.service'
+import jwtDecode from 'jwt-decode' // jwt decode
+import { navigate } from 'gatsby'
+import PopUpLoading from '../../../services/popup/popupLoading'
+import PopUpErro from '../../../services/popup/popupErro'
+import {
+  avoidSpaces, passwordVerificationRegEx, onPasteRemoveSpaces, toLoweCase, onPasteRemoveSpacesandLowercase, keyupPasswordMember
+} from '../../../services/apaiservices'
+import {
+  AccessBox,
+  AccessBoxPlace,
+  Title,
+  Lang,
+  FormPlace,
+  ForgotPassword,
+  LinkInside,
+  FirstLogin,
+  Musthave
+} from '../style'
+
+const Access = () => {
+  const content = useSelector(state => state.content)
+  const translate = statement => content.login[statement]
+  const translateMain = statement => content.main[statement]
+
+  const [passwordShown, setPasswordShown] = useState(false)
+  const [showmodalLoading, setShowmodalLoading] = useState(false)
+  const [closePopupErro, setclosePopupErro] = useState(false)
+  const [errorMsg, setErrorMsg] = useState('')
+  const [showVerifyPassword, setShowVerifyPassword] = useState(false)
+
+  const togglePassword = () => {
+    setPasswordShown(!passwordShown)
+  }
+
+  const modalLoading = () => {
+    setShowmodalLoading(state => !state)
+  }
+
+  const popupErro = () => {
+    setclosePopupErro(true)
+  }
+  const closePopupError = () => {
+    setclosePopupErro(false)
+  }
+
+  const verifyPasswordShow = () => {
+    setShowVerifyPassword(!showVerifyPassword)
+  }
+
+  const {
+    register,
+    //watch,
+    formState: { errors, isValid },
+    handleSubmit
+  } = useForm({ mode: 'all' })
+
+  const submitForm = async data => {
+    modalLoading()
+    try {
+      const credentials = await loginUser(data)
+
+      localStorage.setItem("token", credentials.data.data) // save token at storage
+      const userLogged = jwtDecode(credentials.data.data)
+      localStorage.setItem('userLogged', JSON.stringify(userLogged.user)) // open token as JSON
+
+      modalLoading()
+      navigate('/private/dashboard/')
+    } catch (error) {
+      setErrorMsg(error.message.data)
+      modalLoading()
+      popupErro()
+      // console.log(error.message.data)
+    } finally {
+      // setIsAuthenticating(false)
+    }
+  }
+
+  useEffect(() => {
+    // modalLoading()
+    // popupErro()
+  }, [])
+
+  return (
+    <>
+      {showmodalLoading && (
+        <PopUpLoading
+          title={translate('loading_title')}
+          subtitle={translate('loading_subtitle')}
+        />
+      )}
+      {closePopupErro && (
+        <PopUpErro
+          onClose={() => closePopupError()}
+          title={translate('erro_title')}
+          subtitle={translate('erro_subtitle')}
+          theErrorMsg={errorMsg}
+        />
+      )}
+
+      <AccessBox>
+        <AccessBoxPlace>
+          <FormPlace>
+            <form onSubmit={handleSubmit(submitForm)} >
+
+          {/* <pre style={{backgroundColor:`black`,width:`15rem`,height:`10rem`,left:`0`,top:`0`,color:`white`}}>
+            {JSON.stringify(watch(), null, 2)}
+          </pre> */}
+
+              <div className="simpleInput" >
+                <input
+                  type="email"
+                  autoFocus
+                  onPasteCapture={onPasteRemoveSpacesandLowercase}
+                  onKeyPress={(event) => {avoidSpaces(event); toLoweCase(event)}}
+                  placeholder={translate('email')}
+                  name="login"
+                  {...register("login", {
+                    required: true, maxLength: 200, minLength: 10,
+                    pattern: {
+                      value: /^([\w-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([\w-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$/,
+                      message: "Por favor, preencha este campo."
+                    }
+                  })}
+                />
+                {errors.login && <p>{translate('required_field')}</p>}
+              </div>
+
+              <div className="passwordinput">
+                <input
+                  placeholder={translate('password')}
+                  type={passwordShown ? 'text' : 'password'}
+                  id="password"
+                  onFocus={(event) => { verifyPasswordShow() }}
+                  onBlur={(event) => { verifyPasswordShow() }}
+                  onChange={ keyupPasswordMember}
+                  onPasteCapture={onPasteRemoveSpaces}
+                  onKeyPress={(event) => { avoidSpaces(event); passwordVerificationRegEx(event) }}
+                  {...register("password", { required: true, maxLength: 100, minLength: 8 })}
+                />
+                <span onClick={togglePassword}>
+                  {passwordShown ? <IconShowPassword /> : <IconHidePassword />}
+                </span>
+                {errors.password && <p>{translate('required_field')}</p>}
+              </div>
+
+              <Musthave isVisible={showVerifyPassword} >
+                <p>{translateMain('must_have')}</p>
+                <ul>
+                  <li id="oneNumber">{translateMain('number')}</li>
+                  <li id="oneLowercase">{translateMain('lowercase')}</li>
+                  <li id="oneUppercase">{translateMain('uppercase')}</li>
+                  <li id="eightCaracteres">{translateMain('count')}</li>
+                  <li id="specialCaracteres">{translateMain('special')}</li>
+                </ul>
+              </Musthave>
+
+              <button
+                className="btnGreen"
+                disabled={!isValid}
+                // disabled={isAuthenticating || !isValid}
+                type="submit"
+              >
+                {translate('login_btn')}
+              </button>
+
+            </form>
+          </FormPlace>
+        </AccessBoxPlace>
+      </AccessBox>
+    </>
+  )
+}
+
+export default Access
