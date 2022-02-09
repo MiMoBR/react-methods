@@ -1,0 +1,86 @@
+const avoidSpaces = event => {
+  const space = event.charCode
+  if (space === 32) {
+    event.preventDefault()
+  }
+}
+
+const onPasteRemoveSpaces = event => {
+  const testContent = event.clipboardData.getData('Text')
+  event.target.value = testContent.trim()
+  event.preventDefault()
+}
+
+const onPasteRemoveSpacesandLowercase = event => {
+  const testContent = event.clipboardData.getData('Text')
+  event.target.value = testContent.trim()
+  event.target.value = event.target.value.toLowerCase()
+  event.preventDefault()
+}
+
+const passwordVerificationRegEx = event => {
+  const password = event.charCode // ?!@#$%&
+  // console.log(event.charCode)
+
+  if (password === 0 && password <= 32) { event.preventDefault() // 33-!
+  } else if (password === 34) { event.preventDefault() // 35-# 36-$ 37-% 38-&
+  } else if (password >= 39 && password <= 47) { event.preventDefault() // 48-57 0-9
+  } else if (password >= 58 && password <= 62) { event.preventDefault() // 63-? 64 @ A-Z 65-90
+  } else if (password >= 91 && password <= 96) { event.preventDefault() // 97 - 122 a-z
+  } else if (password >= 123) { event.preventDefault() }
+}
+
+const keyupPasswordMember = event => {
+  const input = document.getElementById('password').value
+  const onenumber = document.getElementById('oneNumber')
+  const onelower = document.getElementById('oneLowercase')
+  const oneUpper = document.getElementById('oneUppercase')
+  const counts = document.getElementById('eightCaracteres')
+  const special = document.getElementById('specialCaracteres')
+
+  const hasNumber = (input.match(/[0-9]/g) || []).length
+  hasNumber > 0
+    ? (onenumber.style.color = '#1f9652')
+    : (onenumber.style.color = '#e74c3c')
+
+  const hasLowerCase = (input.match(/[a-z]/g) || []).length
+  hasLowerCase > 0
+    ? (onelower.style.color = '#1f9652')
+    : (onelower.style.color = '#e74c3c')
+
+  const hasUpperCase = (input.match(/[A-Z]/g) || []).length
+  hasUpperCase > 0
+    ? (oneUpper.style.color = '#1f9652')
+    : (oneUpper.style.color = '#e74c3c')
+
+  counts && input.length >= 8
+  ? (counts.style.color = '#1f9652')
+  : (counts.style.color = '#e74c3c') // count 8 caracters
+
+  const hasSpecialCase = (input.match(/[?!@#$%&]/g) || []).length
+  hasSpecialCase > 0
+    ? (special.style.color = '#1f9652')
+    : (special.style.color = '#e74c3c')
+}
+
+const maxLength = object => {
+  if (object.target.value.length > object.target.maxLength) {
+    object.target.value = object.target.value.slice(0, object.target.maxLength)
+  }
+  // onInput={maxLength}
+  // maxLength="8"
+}
+
+const toLoweCase = event => {
+  event.target.value = event.target.value.toLowerCase()
+}
+
+export {
+  avoidSpaces,
+  onPasteRemoveSpaces,
+  passwordVerificationRegEx,
+  maxLength,
+  toLoweCase,
+  onPasteRemoveSpacesandLowercase,
+  keyupPasswordMember
+}
